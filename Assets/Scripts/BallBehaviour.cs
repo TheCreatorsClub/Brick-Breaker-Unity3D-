@@ -13,6 +13,7 @@ public class BallBehaviour : MonoBehaviour
     private bool isInGame = true;
     public ParticleSystem brickExplosion;
     public ParticleSystem Explosion;
+    public GameObject brokenBrickObject;
     public int score = 0;
     private const int SCORE_PER_BRICK = 5;
     private const int SCORE_PER_DEATH = 20;
@@ -24,6 +25,7 @@ public class BallBehaviour : MonoBehaviour
     public AudioSource explosionAudio;
     public GameObject LifePowerUp;
     public GameObject LengthPowerUp;
+    private bool isLarge = false;
     public GameObject ExplosionPowerUp;
     public bool isExplosable;
     public bool isGameOver = false;
@@ -97,27 +99,40 @@ public class BallBehaviour : MonoBehaviour
 
         if(other.gameObject.CompareTag("Brick") )
         {
-            ParticleSystem explosion;
+            
             Destroy(other.gameObject);
-           
-            if(isExplosable)
-            {
-                explosionAudio.Play();
-               isExplosable = false;
-               explosion = Instantiate(Explosion , transform.position , transform.rotation);
-                Destroy(explosion.gameObject , 2.5f);
-               ResetBall(); 
-            }
-            else 
-            {
-                 brickaudio.Play();
-                ParticleSystem Brickbreak = Instantiate(brickExplosion , transform.position , transform.rotation);
-                    Destroy(Brickbreak.gameObject , 2.5f);
-            }
-            score += SCORE_PER_BRICK;
-
+            DestroyBrick();
             GeneratePowerUp(chanceOfPowerUp);
         }
+        
+        if(other.gameObject.CompareTag("StrongBrick"))
+        {
+            
+            CreateBrokenBrick(other.transform.position , other.transform.rotation);
+            Destroy(other.gameObject);
+            
+        }
+
+        if(other.gameObject.tag == "BrokenStrongBrick")
+        {
+            Destroy(other.gameObject);
+            DestroyBrick();
+            GeneratePowerUp(chanceOfPowerUp);
+
+        }
+
+        if(other.gameObject.tag == "BigBallBrick")
+        {
+            Destroy(other.gameObject);
+            DestroyBrick();
+            GeneratePowerUp(chanceOfPowerUp);
+
+            if(!isLarge)
+                MakeBallBig();
+        }
+
+        
+
     }
 
     void GeneratePowerUp(int chance)
@@ -154,9 +169,49 @@ public class BallBehaviour : MonoBehaviour
 
     void LoadMainMenu()
     {
-        
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
 
 
+    void DestroyBrick()
+    {
+        ParticleSystem explosion;
+        if(isExplosable)
+            {
+                explosionAudio.Play();
+               isExplosable = false;
+               explosion = Instantiate(Explosion , transform.position , transform.rotation);
+                Destroy(explosion.gameObject , 2.5f);
+               ResetBall(); 
+            }
+            else 
+            {
+                 brickaudio.Play();
+                ParticleSystem Brickbreak = Instantiate(brickExplosion , transform.position , transform.rotation);
+                    Destroy(Brickbreak.gameObject , 2.5f);
+            }
+            score += SCORE_PER_BRICK;
+
+    }
+
+    void CreateBrokenBrick(Vector3 position , Quaternion rotation)
+    {
+        Instantiate(brokenBrickObject , position , rotation);
+    }
+
+    void MakeBallBig()
+    {
+        Vector3 scaleBy = new Vector3(1.5f,1.5f,0);
+        transform.localScale += scaleBy;
+        Invoke("MakeBallSmall",5f);
+        isLarge = true;
+    }
+
+    void MakeBallSmall()
+    {
+        Vector3 scaleBy = new Vector3(1.5f , 1.5f , 0);
+        isLarge = false;
+        transform.localScale -= scaleBy;
+    }
     
 }

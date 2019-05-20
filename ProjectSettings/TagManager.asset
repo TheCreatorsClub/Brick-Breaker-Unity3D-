@@ -9,6 +9,9 @@ TagManager:
   - LifePowerUp
   - LengthPowerUp
   - ExplosionPowerUp
+  - StrongBrick
+  - BrokenStrongBrick
+  - BigBallBrick
   layers:
   - Default
   - TransparentFX
